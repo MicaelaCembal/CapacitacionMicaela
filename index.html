@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>no es magia. es informática. — mica</title>
+<meta name="description" content="Acercaste tu celular a una tarjeta sin batería y pasó algo. Acá te cuento qué.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 rx=%2220%22 fill=%22%23FF3FA4%22/><text x=%2250%22 y=%2268%22 font-size=%2260%22 text-anchor=%22middle%22 fill=%22%23111%22>&lt;/&gt;</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Space+Mono:wght@400;700&family=Caveat:wght@600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --pink:#FF3FA4;
+    --pink-deep:#E01D86;
+    --lav:#C9A6FF;
+    --lime:#C6FF3C;
+    --ink:#171018;
+    --paper:#FFF6FB;
+    --card:#FFFFFF;
+    --shadow-off: 5px 5px 0 var(--ink);
+    --shadow-off-sm: 3px 3px 0 var(--ink);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    color:var(--ink);
+    font-family:'Space Grotesk',sans-serif;
+    background:var(--paper);
+    position:relative;
+    overflow-x:hidden;
+  }
+  ::selection{background:var(--ink); color:var(--lime);}
+  a{color:inherit;}
+  :focus-visible{outline:3px solid var(--ink); outline-offset:2px;}
+
+  .mono{font-family:'Space Mono',monospace;}
+  .hand{font-family:'Caveat',cursive;}
+
+  /* ---------- glitter dust: dots, not stars ---------- */
+  .glitter-layer{
+    position:fixed; inset:0; z-index:0; pointer-events:none; opacity:.7;
+    background-image:
+      radial-gradient(circle, var(--pink) 0 2px, transparent 2.4px),
+      radial-gradient(circle, var(--lime) 0 1.6px, transparent 2px),
+      radial-gradient(circle, var(--lav) 0 1.8px, transparent 2.2px);
+    background-size: 90px 90px, 130px 130px, 160px 160px;
+    background-position: 10px 20px, 60px 90px, 30px 60px;
+  }
+
+  /* code-comment watermark, tiled */
+  .watermark{
+    position:fixed; z-index:0; pointer-events:none;
+    top:-10%; left:-10%; width:120%; height:130%;
+    transform:rotate(-8deg);
+    display:flex; flex-wrap:wrap; gap:26px 40px; align-content:flex-start;
+    opacity:.05;
+  }
+  .watermark span{ font-family:'Space Mono',monospace; font-size:.85rem; white-space:nowrap; color:var(--ink);}
+
+  main, #intro{position:relative; z-index:1;}
+
+  /* sticky note brand tag */
+  .brand-tag{
+    position:fixed; top:14px; left:14px; z-index:40;
+    background:var(--lime);
+    border:2px solid var(--ink);
+    box-shadow:var(--shadow-off-sm);
+    padding:7px 12px;
+    font-family:'Space Mono',monospace;
+    font-size:.7rem;
+    transform:rotate(-3deg);
+  }
+  .brand-tag b{display:block; font-size:.72rem;}
+
+  /* ---------- intro / terminal boot ---------- */
+  #intro{
+    min-height:100vh;
+    display:flex; align-items:center; justify-content:center; flex-direction:column;
+    padding:32px 18px;
+    position:fixed; inset:0; z-index:50;
+    background:var(--paper);
+    transition:opacity .5s ease, visibility .5s ease;
+  }
+  #intro.hide{opacity:0; visibility:hidden; pointer-events:none;}
+  .term{
+    width:min(560px,92vw);
+    background:var(--ink);
+    color:#DDFFCB;
+    border:3px solid var(--ink);
+    box-shadow:8px 8px 0 var(--pink);
+    border-radius:4px;
+    overflow:hidden;
+  }
+  .term-bar{
+    background:#2B2130; padding:9px 12px; display:flex; gap:6px;
+  }
+  .term-bar i{width:10px; height:10px; border-radius:50%; display:inline-block;}
+  .term-bar i:nth-child(1){background:#FF5F57;}
+  .term-bar i:nth-child(2){background:#FEBC2E;}
+  .term-bar i:nth-child(3){background:#28C840;}
+  .term-body{
+    padding:20px 18px 24px;
+    font-family:'Space Mono',monospace;
+    font-size:.88rem;
+    line-height:1.7;
+    min-height:170px;
+  }
+  .term-body .prompt{color:#8AF0FF;}
+  .term-body .out{color:#DDFFCB;}
+  .term-body .pink{color:var(--pink); font-weight:700;}
+  .cursor{
+    display:inline-block; width:8px; height:1em; background:#DDFFCB;
+    vertical-align:text-bottom; animation:blink 1s steps(1) infinite;
+  }
+  @keyframes blink{ 50%{opacity:0;} }
+
+  .intro-cta{margin-top:26px; opacity:0;}
+  .intro-cta.show{opacity:1;}
+  .btn{
+    font-family:'Space Mono',monospace; font-weight:700; font-size:.85rem;
+    background:var(--pink); color:var(--ink);
+    border:2px solid var(--ink);
+    padding:13px 22px;
+    box-shadow:var(--shadow-off);
+    cursor:pointer;
+    display:inline-flex; align-items:center; gap:8px;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .btn:hover{transform:translate(2px,2px); box-shadow:3px 3px 0 var(--ink); background:var(--lime);}
+  .btn:active{transform:translate(5px,5px); box-shadow:0 0 0 var(--ink);}
+
+  @media (prefers-reduced-motion: reduce){ *{animation:none !important;} }
+
+  /* ---------- hero ---------- */
+  .hero{max-width:900px; margin:0 auto; padding:88px 22px 30px;}
+  .hero .kicker{
+    font-family:'Space Mono',monospace; font-size:.78rem; letter-spacing:.02em;
+    display:inline-block; background:var(--lav); border:2px solid var(--ink);
+    box-shadow:var(--shadow-off-sm); padding:5px 10px; margin-bottom:20px; transform:rotate(-1deg);
+  }
+  .hero h1{
+    font-family:'Space Grotesk',sans-serif; font-weight:700;
+    font-size:clamp(2.1rem,7.4vw,3.7rem); line-height:1.02; margin:0 0 16px;
+  }
+  .hero h1 .hl{
+    background:var(--pink); padding:0 8px; box-decoration-break:clone;
+    -webkit-box-decoration-break:clone;
+  }
+  .hero .lede{max-width:58ch; font-size:1.05rem; line-height:1.6; color:#3A2E38; font-weight:500;}
+  .hero .note{
+    margin-top:20px; font-family:'Caveat',cursive; font-size:1.35rem; color:var(--pink-deep);
+    transform:rotate(-1.4deg); display:inline-block;
+  }
+
+  /* ---------- exhibit 00 ---------- */
+  .exhibit-00{max-width:880px; margin:26px auto 0; padding:0 22px;}
+  .card00{
+    background:var(--card); border:3px solid var(--ink); box-shadow:var(--shadow-off);
+    padding:24px; display:grid; grid-template-columns:auto 1fr; gap:20px; align-items:center;
+  }
+  .nfc-icon{
+    width:56px; height:56px; border:2px solid var(--ink); background:var(--lime);
+    display:flex; align-items:center; justify-content:center; flex-shrink:0;
+  }
+  .tagline{
+    font-family:'Space Mono',monospace; font-size:.68rem; text-transform:uppercase; letter-spacing:.06em;
+    color:var(--pink-deep); display:block; margin-bottom:6px;
+  }
+  .card00 h3{margin:0 0 6px; font-size:1.1rem; font-weight:700;}
+  .card00 p{margin:0; color:#3A2E38; font-size:.94rem; line-height:1.55;}
+
+  /* ---------- exhibits grid ---------- */
+  .exhibits{
+    max-width:900px; margin:28px auto 64px; padding:0 22px;
+    display:grid; grid-template-columns:repeat(auto-fill, minmax(258px,1fr)); gap:16px;
+  }
+  .exhibit{
+    background:var(--card); border:2px solid var(--ink); box-shadow:var(--shadow-off-sm);
+    padding:15px 17px; cursor:pointer;
+    transition:transform .12s ease, box-shadow .12s ease;
+  }
+  .exhibit:nth-child(3n+1){transform:rotate(-.6deg);}
+  .exhibit:nth-child(3n+2){transform:rotate(.5deg);}
+  .exhibit:nth-child(3n){transform:rotate(-.3deg);}
+  .exhibit:hover{transform:translate(2px,2px) rotate(0deg); box-shadow:2px 2px 0 var(--ink);}
+  .exhibit[open]{background:#FFF0F8;}
+  .exhibit summary{
+    list-style:none; display:flex; align-items:baseline; gap:9px; font-weight:600; font-size:.97rem;
+  }
+  .exhibit summary::-webkit-details-marker{display:none;}
+  .exhibit summary .num{ font-family:'Space Mono',monospace; font-size:.72rem; color:var(--pink-deep); flex-shrink:0;}
+  .exhibit summary .q{flex:1;}
+  .exhibit summary .plus{ font-family:'Space Mono',monospace; font-weight:700; flex-shrink:0; transition:transform .2s ease;}
+  .exhibit[open] summary .plus{transform:rotate(45deg);}
+  .exhibit .a{
+    margin-top:11px; padding-top:11px; border-top:2px dashed var(--ink);
+    color:#3A2E38; font-size:.91rem; line-height:1.55;
+  }
+
+  /* ---------- your turn ---------- */
+  .your-turn{max-width:900px; margin:0 auto 80px; padding:0 22px;}
+  .yt-box{
+    background:var(--ink); color:var(--paper);
+    border:3px solid var(--ink); box-shadow:8px 8px 0 var(--lav);
+    padding:30px 26px;
+  }
+  .yt-box .tagline{color:var(--lime);}
+  .yt-box h2{font-family:'Space Grotesk',sans-serif; font-size:clamp(1.3rem,4vw,1.8rem); margin:0 0 8px;}
+  .yt-box p.sub{color:#CBB9C8; margin:0 0 18px; max-width:52ch; line-height:1.55;}
+  .chips{display:flex; flex-wrap:wrap; gap:8px; margin-bottom:18px;}
+  .chip{
+    font-family:'Space Mono',monospace; font-size:.74rem;
+    background:transparent; border:1.5px solid #6E5C6B; color:var(--paper);
+    padding:7px 12px; cursor:pointer;
+  }
+  .chip:hover{border-color:var(--lime); color:var(--lime);}
+  .ask-row{display:flex; gap:10px; flex-wrap:wrap;}
+  .ask-row input{
+    flex:1; min-width:200px; font-family:'Space Mono',monospace; font-size:.9rem;
+    padding:12px 14px; border:2px solid #6E5C6B; background:#241C22; color:var(--paper);
+  }
+  .ask-row input::placeholder{color:#8A7A87;}
+  .ask-row .btn{background:var(--lime);}
+  .ask-row .btn:hover{background:var(--pink);}
+  .answer-box{
+    margin-top:16px; background:#241C22; border-left:3px solid var(--lime);
+    padding:13px 15px; font-size:.9rem; line-height:1.55; display:none; font-family:'Space Mono',monospace;
+  }
+  .answer-box.show{display:block;}
+
+  footer{max-width:900px; margin:0 auto; padding:0 22px 70px;}
+  .code-block{
+    font-family:'Space Mono',monospace; font-size:.78rem; line-height:1.7; color:#6E5C6B;
+    border-left:2px solid var(--ink); padding-left:14px;
+  }
+  .code-block .k{color:var(--pink-deep);}
+
+  @media (max-width:600px){
+    .card00{grid-template-columns:1fr; text-align:left;}
+    .brand-tag{top:8px; left:8px;}
+  }
+</style>
+</head>
+<body>
+
+<div class="glitter-layer" aria-hidden="true"></div>
+<div class="watermark" id="watermark" aria-hidden="true"></div>
+
+<div class="brand-tag" aria-hidden="true">
+  hecho por
+  <b>micaela cembal</b>
+</div>
+
+<!-- ============ INTRO / TERMINAL BOOT ============ -->
+<section id="intro">
+  <div class="term">
+    <div class="term-bar"><i></i><i></i><i></i></div>
+    <div class="term-body" id="termBody"></div>
+  </div>
+  <div class="intro-cta" id="introCta">
+    <button class="btn" id="openCase">ver la posta →</button>
+  </div>
+</section>
+
+<!-- ============ MAIN ============ -->
+<main>
+  <div class="hero">
+    <span class="kicker mono">capacitación nofim — 20/08/2026</span>
+    <h1>no es magia.<br><span class="hl">es informática.</span></h1>
+    <p class="lede">Usás tecnología todo el día. Desde que desbloqueás el celular hasta que le preguntás algo a una IA antes de dormir. Armé esta página con lo que te conté hoy — para que la curiosidad no se corte a los siete minutos.</p>
+    <span class="note hand">— hecho a mano (bueno, a teclado) por mica</span>
+  </div>
+
+  <div class="exhibit-00">
+    <div class="card00">
+      <div class="nfc-icon" aria-hidden="true">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#171018" stroke-width="2.2" stroke-linecap="round">
+          <path d="M8 8a5 5 0 0 1 0 8"/>
+          <path d="M11 5a9 9 0 0 1 0 14"/>
+          <circle cx="4" cy="12" r="1.4" fill="#171018" stroke="none"/>
+        </svg>
+      </div>
+      <div>
+        <span class="tagline">// esto pasó recién</span>
+        <h3>¿Cómo funcionó la tarjeta que me trajo hasta acá?</h3>
+        <p>Se llama NFC (<em>Near Field Communication</em>). Es una tecnología de corto alcance: tu celular y la tarjeta se hablan solo cuando están a centímetros de distancia. La tarjeta no tiene batería — es una etiqueta "pasiva": cuando tu celular se acerca, le manda un pulso de energía tan chico que le alcanza a la tarjeta para "despertarse" un instante y devolver esta dirección web. Ni wifi, ni datos, ni magia. Solo dos antenas muy cerca.</p>
+      </div>
+    </div>
+  </div>
+
+  <section class="exhibits" id="exhibits" aria-label="Preguntas frecuentes"></section>
+
+  <div class="your-turn">
+    <div class="yt-box">
+      <span class="tagline mono">// input(vos)</span>
+      <h2>ahora te toca a vos</h2>
+      <p class="sub">¿Qué tecnología usás todos los días y nunca entendiste cómo funciona? Elegí una o escribí la tuya.</p>
+      <div class="chips" id="chips"></div>
+      <div class="ask-row">
+        <input id="askInput" type="text" placeholder="ej: ¿cómo funciona AirDrop?" aria-label="Escribí tu pregunta">
+        <button class="btn" id="askBtn">preguntar</button>
+      </div>
+      <div class="answer-box" id="answerBox"></div>
+    </div>
+  </div>
+
+  <footer>
+    <div class="code-block">
+      /**<br>
+      &nbsp;* <span class="k">no es magia. es informática.</span><br>
+      &nbsp;* hecho por Micaela Cembal<br>
+      &nbsp;* capacitación Nofim · 20/08/2026<br>
+      &nbsp;* gracias por tocar la tarjeta 🖤<br>
+      &nbsp;*/
+    </div>
+  </footer>
+</main>
+
+<script>
+// ---------- terminal boot typing ----------
+const lines = [
+  {p:"$ whoami", o:null},
+  {p:null, o:"mica — estudiante de ing. informática"},
+  {p:"$ tocar_tarjeta.js --nfc", o:null},
+  {p:null, o:"leyendo etiqueta pasiva... ok"},
+  {p:null, o:"redirigiendo a capacitacionmicaela.vercel.app"},
+  {p:"$ echo $MENSAJE", o:null},
+  {p:null, o:"no es magia.", cls:"pink"},
+  {p:null, o:"es informática.", cls:"pink"},
+];
+const termBody = document.getElementById('termBody');
+let li = 0, ci = 0;
+
+function typeLine(){
+  if(li >= lines.length){
+    const c = document.createElement('span'); c.className='cursor';
+    termBody.appendChild(c);
+    document.getElementById('introCta').classList.add('show');
+    return;
+  }
+  const line = lines[li];
+  const text = line.p || line.o;
+  const row = document.createElement('div');
+  if(line.p) row.innerHTML = '<span class="prompt"></span>';
+  else row.innerHTML = '<span class="out ' + (line.cls||'') + '"></span>';
+  termBody.appendChild(row);
+  const target = row.querySelector('span');
+
+  function typeChar(){
+    if(ci <= text.length){
+      target.textContent = text.slice(0,ci);
+      ci++;
+      setTimeout(typeChar, line.p ? 32 : 14);
+    } else {
+      ci = 0; li++;
+      setTimeout(typeLine, line.p ? 120 : 220);
+    }
+  }
+  typeChar();
+}
+typeLine();
+
+const intro = document.getElementById('intro');
+document.getElementById('openCase').addEventListener('click', ()=> intro.classList.add('hide'));
+
+// watermark wallpaper
+const wm = document.getElementById('watermark');
+for(let i=0;i<80;i++){
+  const s = document.createElement('span');
+  s.textContent = '/* micaela cembal */';
+  wm.appendChild(s);
+}
+
+// exhibits data
+const exhibits = [
+  ["¿Qué acepto cuando acepto cookies?","Una cookie es un dato chiquito que una página guarda en tu navegador para acordarse de vos: que iniciaste sesión, tus preferencias, o qué mirás. Existe porque la web funciona con un protocolo (HTTP) que no tiene memoria propia entre pedido y pedido. La cookie es, básicamente, la forma en que una página te dice 'ah, sos vos de nuevo'."],
+  ["¿Cómo sabe mi celular dónde estoy?","Por GPS: tu celular recibe señales de varios satélites y, comparando cuánto tardó cada una en llegar, calcula tu posición. No hay ningún satélite 'mirándote': es al revés, tu celular escucha y calcula. Internet no es necesario para eso — solo lo usás después para cargar el mapa."],
+  ["¿Wi-Fi e Internet son lo mismo?","No. Wi-Fi es solo la forma en que tu dispositivo se conecta sin cables a un router, que está cerca tuyo. Internet es la red gigante de redes que conecta a ese router con el resto del mundo. Podés tener Wi-Fi sin Internet (por ejemplo, a una impresora) e Internet sin Wi-Fi (con cable o datos móviles)."],
+  ["¿Dónde está realmente la nube?","En computadoras. La nube no es un lugar abstracto flotando en el aire: es infraestructura física real — servidores, discos, cables, centros de datos enormes — que pertenece a alguna empresa, en algún país, en algún edificio. 'Subir algo a la nube' es mandarlo a la computadora de otro."],
+  ["¿Cómo funciona el cifrado de WhatsApp?","Tu mensaje se cifra (se convierte en algo ilegible) en tu celular, viaja así por la red, y solo se puede descifrar con una clave que tiene el celular de quien lo recibe. Aunque el mensaje pase por servidores en el medio, nadie ahí puede leerlo sin esa clave. No lo escondimos: lo hicimos indescifrable sin la llave correcta."],
+  ["¿Cómo sabe Shazam qué canción está sonando?","Convierte unos segundos de audio en una especie de huella digital (un patrón de frecuencias) y la compara contra una base de millones de huellas ya guardadas. No 'escucha' la canción como nosotros: busca una coincidencia matemática entre patrones."],
+  ["¿Cómo funciona Face ID?","Tu celular proyecta miles de puntos infrarrojos invisibles sobre tu cara y arma un mapa 3D. Ese mapa se compara con el que guardaste al configurarlo — todo procesado adentro del dispositivo, no en internet. Por eso funciona en la oscuridad y por qué una foto plana no lo engaña fácilmente."],
+  ["¿Por qué un QR puede funcionar aunque esté parcialmente tapado?","Los códigos QR incluyen información redundante a propósito (corrección de errores), pensada para que sigan siendo legibles aunque una parte esté rota, sucia o tapada por un logo. El lector reconstruye lo que falta con esos datos extra."],
+  ["¿Qué pasa realmente cuando borro una foto?","Casi nunca se borra al toque. Primero suele ir a una papelera (en el celular o en la nube) por un tiempo. Y aún 'borrada del todo', el espacio que ocupaba en el disco se marca como disponible, pero los datos pueden seguir físicamente ahí hasta que algo nuevo los pisa."],
+  ["¿Cómo funciona Bluetooth?","Es otra forma de comunicación de corto alcance, como el Wi-Fi pero pensada para conectar dispositivos entre sí (auriculares, teclados, tu auto) en vez de conectarte a internet. Dos dispositivos se 'emparejan' una vez y después se reconocen automáticamente cada vez que están cerca."],
+  ["¿Cómo llega un WhatsApp desde Argentina hasta otro país?","Tu mensaje no viaja directo: salta de red en red — de tu celular a una antena, de ahí a distintos servidores, muchas veces por cables de fibra óptica que cruzan literalmente el fondo del océano — hasta llegar al operador y al celular de destino. Todo eso en, más o menos, un segundo."],
+  ["¿ChatGPT piensa?","No como una persona. Un modelo de lenguaje no busca una respuesta ya escrita en una base de datos: genera, palabra por palabra (o 'token' por token), la continuación más probable según patrones que aprendió de enormes cantidades de texto y el contexto que le diste. No hay alguien adentro decidiendo — hay matemática prediciendo qué sigue."],
+  ["¿Cómo aprende una inteligencia artificial?","Durante el entrenamiento, el modelo ve muchísimos ejemplos y ajusta millones de parámetros internos para predecir mejor cada vez qué debería venir después, dado un contexto. No memoriza como una foto: aprende patrones y relaciones estadísticas del lenguaje (o imágenes, o lo que sea que esté entrenando)."],
+  ["¿Cómo funciona pagar apoyando una tarjeta?","Usa la misma tecnología NFC de esta tarjeta que tenés en la mano. Tu tarjeta o celular y el posnet se comunican a centímetros de distancia, se identifican con datos cifrados y de un solo uso (no viaja el número de tarjeta 'pelado'), y el banco autoriza todo en el momento."],
+];
+
+const grid = document.getElementById('exhibits');
+exhibits.forEach((ex,i)=>{
+  const d = document.createElement('details');
+  d.className = 'exhibit';
+  d.innerHTML = `
+    <summary>
+      <span class="num">#${String(i+1).padStart(2,'0')}</span>
+      <span class="q">${ex[0]}</span>
+      <span class="plus">+</span>
+    </summary>
+    <div class="a">${ex[1]}</div>
+  `;
+  grid.appendChild(d);
+});
+
+// your turn: curated local answers
+const extra = [
+  {k:['airdrop'], a:"AirDrop combina Bluetooth (para descubrir dispositivos cercanos y ponerse de acuerdo) con una conexión Wi-Fi directa entre los dos aparatos, sin pasar por internet ni por un router. Por eso funciona incluso sin datos ni wifi de verdad: los dispositivos arman su propia mini-red entre ellos."},
+  {k:['incognito','incógnito'], a:"El modo incógnito evita que tu propio navegador guarde el historial, las cookies y lo que escribiste en esa sesión. No te hace invisible: tu proveedor de internet, tu trabajo/colegio o las páginas que visitás igual pueden saber que estuviste ahí."},
+  {k:['spotify','recomien'], a:"Spotify compara tus gustos con los de millones de usuarios parecidos a vos (filtrado colaborativo) y también analiza características del audio de las canciones que escuchás. Cruzando ambas cosas arma una predicción de qué más te podría gustar."},
+  {k:['mirando','atencion','atención','pantalla se apaga'], a:"Muchos celulares usan la cámara frontal o sensores de proximidad/movimiento para detectar si estás mirando la pantalla, y así deciden si atenuar el brillo, evitar que se bloquee, o silenciar una notificación. Es visión por computadora corriendo todo el tiempo en segundo plano."},
+  {k:['reconocimiento facial','facial'], a:"Un sistema de reconocimiento facial convierte tu cara en un mapa de puntos y distancias (no guarda 'una foto'), y compara ese patrón matemático contra uno guardado. Si coinciden dentro de cierto margen, te reconoce."},
+  {k:['borro','elimino','archivo'], a:"Cuando 'eliminás' un archivo, en general el sistema solo marca ese espacio como libre para reutilizar — los datos pueden seguir físicamente ahí hasta que algo nuevo los sobrescribe. Por eso a veces se puede recuperar algo borrado."},
+];
+
+const chipsWrap = document.getElementById('chips');
+const chipLabels = ["AirDrop","modo incógnito","Spotify","cómo sabe que lo estoy mirando","reconocimiento facial","borrar un archivo"];
+chipLabels.forEach(label=>{
+  const b = document.createElement('button');
+  b.className = 'chip';
+  b.textContent = label;
+  b.addEventListener('click', ()=>{ input.value = label; ask(); });
+  chipsWrap.appendChild(b);
+});
+
+const input = document.getElementById('askInput');
+const answerBox = document.getElementById('answerBox');
+
+function ask(){
+  const q = input.value.trim().toLowerCase();
+  if(!q) return;
+  const hit = extra.find(e => e.k.some(k => q.includes(k)));
+  answerBox.textContent = hit ? hit.a : "esa todavía no está en mi lista — buena pregunta igual. guardala y hacésela a mica la próxima, o tocá la tarjeta de nuevo y probá con otra.";
+  answerBox.classList.add('show');
+}
+document.getElementById('askBtn').addEventListener('click', ask);
+input.addEventListener('keydown', e=>{ if(e.key==='Enter') ask(); });
+</script>
+</body>
+</html>
